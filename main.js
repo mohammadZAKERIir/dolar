@@ -3,7 +3,7 @@ const tala = document.getElementById("tala");
 const seke = document.getElementById("seke");
 const date= document.getElementById("date");
 
-const url = "https://api.navasan.tech/latest/?api_key=freeJWQJQzaDwAVOLq34CBn0ANvJg9py";
+const url = "https://api.navasan.tech/latest/?api_key=freeZuus2WMcYP615r5RchgbRWX8dufN";
 
 fetch(url)
   .then(response => response.json())
