@@ -9,7 +9,7 @@ fetch(url)
   .then(response => response.json())
   .then(data => {
     dolar.textContent = data.usd_sell.value + " "+"تومان"
-    date.textContent = data.usd_sell.date + " " + "آخرین به روزرسانی در"
+    date.textContent = data.usd_sell.date 
   })
 
   fetch(url)
