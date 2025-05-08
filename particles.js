@@ -1,73 +1,82 @@
-const section = document.querySelector('.background-section'); // سکشن اصلی که بکگراند داره
-
-const canvas = document.createElement('canvas');
-canvas.classList.add('background-canvas');
-section.appendChild(canvas);
+const canvas = document.getElementById('particlesCanvas');
 const ctx = canvas.getContext('2d');
 
-function resizeCanvas() {
-  canvas.width = section.offsetWidth;
-  canvas.height = section.offsetHeight;
-}
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+const particlesArray = [];
+const numberOfParticles = 100;
 
-const particles = [];
+// کلاس ذره
+class Particle {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 3 + 1;
+    this.speedX = Math.random() * 2 - 1;
+    this.speedY = Math.random() * 2 - 1;
+  }
 
-for (let i = 0; i < 100; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    vx: (Math.random() - 0.5) * 1,
-    vy: (Math.random() - 0.5) * 1,
-    radius: Math.random() * 2 + 1
-  });
-}
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
 
-function drawParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // برعکس شدن حرکت ذرات وقتی به دیوار برخورد کنن
+    if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+    if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+  }
 
-  // ذرات رو رسم کن
-  particles.forEach(p => {
+  draw() {
+    ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#00FF7F'; // سبز خوشگل
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
-  });
+  }
+}
 
-  // اتصال بین ذرات
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
+// وصل کردن ذرات به هم با خط نازک
+function connectParticles() {
+  for (let a = 0; a < particlesArray.length; a++) {
+    for (let b = a; b < particlesArray.length; b++) {
+      const dx = particlesArray[a].x - particlesArray[b].x;
+      const dy = particlesArray[a].y - particlesArray[b].y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance < 100) {
+      
+      if (distance < 120) { // فاصله برای کشیدن خط
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = '#00FF7F'; // رنگ خط‌ها هم سبز
-        ctx.lineWidth = 0.5;
+        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
         ctx.stroke();
       }
     }
   }
 }
 
-function updateParticles() {
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-
-    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-  });
+// ایجاد ذرات
+function init() {
+  for (let i = 0; i < numberOfParticles; i++) {
+    particlesArray.push(new Particle());
+  }
 }
 
+// انیمیشن
 function animate() {
-  drawParticles();
-  updateParticles();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particlesArray.forEach(particle => {
+    particle.update();
+    particle.draw();
+  });
+  connectParticles();
   requestAnimationFrame(animate);
 }
 
+init();
 animate();
+
+// واکنش به تغییر سایز صفحه
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
